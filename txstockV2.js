@@ -37,7 +37,7 @@ let httpResult //global buffer
 
 let helpFlag = ($.isNode() ? (process.env.TxStockHelp) : ($.getval('TxStockHelp'))) || 1; //0为不做分享助力任务，1为多用户互相分享助力
 let newbieFlag = ($.isNode() ? (process.env.TxStockNewbie) : ($.getval('TxStockNewbie'))) || 0; //0为不做新手任务，1为自动做新手任务
-let userCookie = ($.isNode() ? process.env.TxStockCookie : $.getdata('TxStockCookie')) || '';
+let userCookie = ($.isNode() ? process.env.TxStockCookie : $.getdata('TxStockCookie')) || '';//Cookie
 let userList = []
 
 let userIdx = 0
