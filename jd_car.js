@@ -11,7 +11,7 @@ const got = require('got')
 const notify = require('./sendNotify')
 
 // 引入京东Cookie模块
-const jdCookieNode = require('./jdCookie.js')
+const jdCookieNode = require('./Cookie/jdCookie.js')
 
 // Optional chaining function
 function oc(fn, defaultVal) {
@@ -128,13 +128,14 @@ async function cgame() {
             'Origin': 'https://pro.m.jd.com',
             'ActivityId': '7c51826be9f241c1ad9733df34d242c5',
             'Host': 'cgame-stadium.jd.com',
-            'Referer': 'https://pro.m.jd.com/mall/active/dj6us2JJRLMMBb4iDaSK4wxvBMt/index.html',
+            'Referer': 'https://pro.m.jd.com/mall/active/Md9FMi1pJXg2q7qc8CmE9FNYDS4/index.html',
             'Accept-Language': 'zh-cn',
             'Accept': 'application/json',
             'Cookie': cookie
         }
     }
 
+    
     const { body } = await got.post(options)
     const data = JSON.parse(body)
 
