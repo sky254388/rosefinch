@@ -57,28 +57,31 @@ let adIdList = [ 26, 181, 186, 187, 188, 189, 190, 195, 210, 214, 216, 225, 308,
 ///////////////////////////////////////////////////////////////////
 
 !(async () => {
+  // 异步函数，用于处理逻辑
   if (typeof $request !== "undefined") {
-    await GetRewrite();
+    // 如果$request存在
+    await GetRewrite(); // 调用GetRewrite函数
   } else {
-    await showUpdateMsg();
+    await showUpdateMsg(); // 调用showUpdateMsg函数
 
     if (!(await checkEnv())) {
-      return;
+      // 如果checkEnv函数返回false
+      return; // 结束执行
     }
 
-    await initAccountInfo();
-    await RunMultiUser();
+    await initAccountInfo(); // 调用initAccountInfo函数
+    await RunMultiUser(); // 调用RunMultiUser函数
   }
 })()
-  .catch((e) => $.logErr(e))
-  .finally(() => $.done());
+  .catch((e) => $.logErr(e)) // 捕获异常并调用$.logErr函数处理
+  .finally(() => $.done()); // 调用$.done函数
 
 function showUpdateMsg() {
+  // 显示更新提示信息
   console.log(
-    "\n2021.12.15 9:30 更新：增加推送奖励，修复一个UA的bug，更改默认UA为安卓\n"
+    "\n2024.01.17 9:30 更新：增加推送奖励，修复一个UA的bug，更改默认UA为安卓\n"
   );
 }
-
 //通知
 async function showmsg() {
   notifyBody = $.name + "运行通知\n\n" + notifyStr;
@@ -216,27 +219,30 @@ async function ListArts() {
 // 阅读文章
 async function ReadArticles() {
     console.log(`\n 开始阅读，将会阅读${maxReadPerRun}篇文章`);
-  
-    // 循环读取文章
+
+    // 循环读取指定数量的文章
     for (let i = 0; i < maxReadPerRun; i++) {
-      let readFlag = 0;
-  
-      // 检查每个用户是否有待读文章
+      let readSuccess = false; // 初始化阅读状态为未成功
+
+      // 遍历所有用户检查是否有待读文章
       for (let userIdx = 0; userIdx < userHeaderArr.length; userIdx++) {
         if (userStatus[userIdx + 1] === true) {
-          // 读取文章并等待 15 秒
+          // 尝试读取文章并等待 15 秒
           await ReadArtsReward();
-          readFlag = 1;
+          
+          // 如果执行了阅读操作，则标记阅读成功
+          readSuccess = true;
+          break; // 一旦有用户阅读成功，跳出当前循环进入下一篇文章的阅读
         }
       }
-  
-      // 如果没有读取到文章，等待 15 秒后继续尝试
-      if (readFlag === 0) {
+
+      // 如果没有成功读取到任何文章，则等待 15 秒后继续尝试读取下一篇文章
+      if (!readSuccess) {
         console.log("等待 15 秒阅读下一篇...");
         await $.wait(15100);
       }
     }
-  }
+}
 
 //*阅读文章奖励
 /*async function ReadArtsReward() {
@@ -262,24 +268,29 @@ async function ReadArticles() {
 
 // 读取文章并获得奖励
 async function ReadArtsReward() {
-    // 从 readList 中随机选择一篇文章进行阅读
-    let randomArticle = readList[Math.floor(Math.random() * readList.length)];
-    let url = `${hostname}/api/news/detail/v64/?aid=${randomArticle}&update_version_code=85221&device_platform=iphone&&device_type=iPhone13,2`;
-    let urlObject = populateGetUrl(url);
-    await httpGet(urlObject, caller)
-      .catch((error) => {
-        console.log(`获取阅读文章失败：${error.message}`);
-        return;
-      });
-    let result = httpResult;
-    if (!result) return;
-    //console.log(result)
-    if (result.message == "success") {
-      console.log(`恭喜，用户${userIdx + 1}阅读文章成功并获得了${result.data.reward_amount}金币！`);
-    } else {
-      console.log(`用户${userIdx + 1}阅读文章失败：${result.message}`);
-    }
+  // 从 readList 中随机选择一篇文章进行阅读
+  let randomArticle = readList[Math.floor(Math.random() * readList.length)];
+  let url = `${hostname}/api/news/detail/v64/?aid=${randomArticle}&update_version_code=85221&device_platform=iphone&&device_type=iPhone13,2`;
+  let urlObject = populateGetUrl(url);
+
+  // 发送 GET 请求获取文章内容
+  await httpGet(urlObject, caller)
+    .catch((error) => {
+      console.log(`获取阅读文章失败：${error.message}`);
+      return;
+    });
+
+  let result = httpResult;
+  // 检查获取的结果是否存在
+  if (!result) return;
+
+  // 检查阅读结果是否为成功
+  if (result.message == "success") {
+    console.log(`恭喜，用户${userIdx + 1}阅读文章成功并获得了${result.data.reward_amount}金币！`);
+  } else {
+    console.log(`用户${userIdx + 1}阅读文章失败：${result.message}`);
   }
+}
 //每日阅读奖励
 async function DailyArtsReward() {
   let caller = printCaller();
@@ -337,16 +348,25 @@ async function ReadDouble() {
 }
 
 async function GetNewTabs() {
+  // 获取调用者信息
   let caller = printCaller();
+  // 拼接请求URL
   let url = `${hostname}/score_task/v1/user/new_tabs/?aid=35&update_version_code=85221&device_platform=iphone&&device_type=iPhone13,2`;
+  // 对URL进行参数填充
   let urlObject = populateGetUrl(url);
+  // 发送HTTP GET请求
   await httpGet(urlObject, caller);
+  // 获取HTTP请求结果
   let result = httpResult;
   if (!result) return;
-  //console.log(result)
+  // 如果没有结果则返回
+  // 如果结果的错误码为0
   if (result.err_no == 0) {
+    // 遍历结果中的每个section
     for (let item of result.data.section) {
+      // 如果item的key为"mine_input_code"
       if (item.key == "mine_input_code") {
+        // 发送邀请码
         await PostInviteCode();
         break;
       }
@@ -603,23 +623,36 @@ async function QuerySleepStatus() {
 }
 
 //睡觉醒来
+/**
+ * 结束睡眠函数
+ */
 async function SleepStop() {
+  // 获取调用者信息
   let caller = printCaller();
+  // 睡眠停止的API链接
   let url = `${hostname}/luckycat/lite/v1/sleep/stop/?aid=35&update_version_code=85221&device_platform=iphone&&device_type=iPhone13,2`;
+  // 处理API链接
   let urlObject = populatePostUrl(url);
+  // 发送HTTP POST请求
   await httpPost(urlObject, caller);
+  // 获取http请求结果
   let result = httpResult;
   if (!result) return;
+  // 如果没有错误再进行下面的操作
+  // 打印结果
   //console.log(result)
+  // 如果错误码为0，表示睡眠停止成功
   if (result.err_no == 0) {
+    // 计算睡眠时长（小时）
     let sleepHour = result.data.sleep_last_time / 3600;
+    // 打印睡眠停止成功的信息
     console.log(
-      `用户${userIdx + 1}结束睡眠，本次睡了${sleepHour}小时，可以领取${
-        result.data.history_amount
-      }金币`
+      `用户${userIdx + 1}结束睡眠，本次睡了${sleepHour}小时，可以领取${result.data.history_amount}金币`
     );
+    // 领取金币
     await SleepDone(result.data.history_amount);
   } else {
+    // 打印睡眠停止失败的信息
     console.log(`用户${userIdx + 1}结束睡眠失败：${result.err_tips}`);
   }
 }
